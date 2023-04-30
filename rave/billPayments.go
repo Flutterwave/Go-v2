@@ -2,6 +2,7 @@ package rave
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -130,8 +131,18 @@ func (b Billpayment) ValidateBillCategory(data *ValidationData) (response Valida
 
 }
 
-//func (b Billpayment) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {
-//
-//}
-//
-//func (b Billpayment) Status(ref string) (response BillPaymentResponse, err error) {}
+func (b Billpayment) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {
+	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "create")
+	err = b.Post(url, nil, req, response)
+	return
+}
+
+func (b Billpayment) Status(ref string) (response BillPaymentResponse, err error) {
+	if ref == "" {
+		err = errors.New("Please specify a tx_ref")
+		return
+	}
+	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "fetch")
+	err = b.Get(fmt.Sprintf("%v/%v", url, ref), nil, response)
+	return
+}
