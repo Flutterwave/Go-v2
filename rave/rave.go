@@ -158,6 +158,7 @@ var Endpoints = map[string]map[string]string{
 		"validate":   "v3/bill-items/:item_code/validate",
 		"list":       "/v3/bills",
 		"fetch":      "/v3/bills",
+		"create":     "/v3/bills",
 	},
 	"flutterwaveOTP": {
 		"otp": "v2/services/confluence",
