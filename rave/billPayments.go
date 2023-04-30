@@ -84,7 +84,7 @@ type BillPaymentResponse struct {
 	Token       interface{} `json:"token"`
 }
 
-func (b Billpayment) GetBillCategories(filter ...BillCategoryFilter) (categories []BillCategory, err error) {
+func (b BillPayments) GetBillCategories(filter ...BillCategoryFilter) (categories []BillCategory, err error) {
 	var params map[string]string
 	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "categories")
 	if len(filter) > 0 {
@@ -100,7 +100,7 @@ func (b Billpayment) GetBillCategories(filter ...BillCategoryFilter) (categories
 	return
 }
 
-func (b Billpayment) ValidateBillCategory(data *ValidationData) (response ValidationResponse, err error) {
+func (b BillPayments) ValidateBillCategory(data *ValidationData) (response ValidationResponse, err error) {
 	if data == nil {
 		err = errors.New("Please provide category information")
 		return
@@ -131,13 +131,13 @@ func (b Billpayment) ValidateBillCategory(data *ValidationData) (response Valida
 
 }
 
-func (b Billpayment) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {
+func (b BillPayments) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {
 	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "create")
 	err = b.Post(url, nil, req, response)
 	return
 }
 
-func (b Billpayment) Status(ref string) (response BillPaymentResponse, err error) {
+func (b BillPayments) Status(ref string) (response BillPaymentResponse, err error) {
 	if ref == "" {
 		err = errors.New("Please specify a tx_ref")
 		return
