@@ -3,6 +3,7 @@ package rave
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"io"
@@ -74,9 +75,19 @@ func (r *Rave) call(method, url string, params map[string]string, body, v interf
 func (r *Rave) decodeResponse(httpResp *http.Response, v interface{}) error {
 	var resp map[string]interface{}
 	respBody, err := ioutil.ReadAll(httpResp.Body)
-	json.Unmarshal(respBody, &resp)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(respBody, &resp)
+	if err != nil {
+		return err
+	}
 
-	if status, _ := resp["status"].(bool); !status || httpResp.StatusCode >= 400 {
+	if status, _ := resp["status"].(string); status != "success" || httpResp.StatusCode >= 400 {
+		err = errors.New("Unkown error")
+		if fwErr, ok := resp["message"].(string); ok {
+			err = errors.New(fwErr)
+		}
 		if r.EnableLogging {
 			log.Printf("Flutterwave error: %+v", err)
 			log.Printf("HTTP Response: %+v", resp)
@@ -114,3 +125,9 @@ func mapstruct(data interface{}, v interface{}) error {
 	err = decoder.Decode(data)
 	return err
 }
+
+//type ErrorBody struct {
+//	Status  string      `json:"status"`
+//	Message string      `json:"message"`
+//	Data    interface{} `json:"data"`
+//}
