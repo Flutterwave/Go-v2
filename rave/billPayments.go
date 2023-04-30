@@ -1,6 +1,11 @@
 package rave
 
-import "time"
+import (
+	"errors"
+	"strconv"
+	"strings"
+	"time"
+)
 
 type BillPayments struct {
 	Rave
@@ -22,20 +27,23 @@ type BillCategory struct {
 	LabelName         string    `json:"label_name"`
 	Amount            int       `json:"amount"`
 }
-type BillCategoriesFilter struct {
-	Airtime    int32 `json:"airtime"`
-	DataBundle int32 `json:"data_bundle"`
-	Power      int32 `json:"power"`
-	Internet   int32 `json:"internet"`
-	Toll       int32 `json:"toll"`
-	Cable      int32 `json:"cable"`
-	BillerCode int32 `json:"biller_code"`
-}
+
+type BillCategoryFilter string
+
+const (
+	Airtime    BillCategoryFilter = "airtime"
+	DataBundle BillCategoryFilter = "data_bundle"
+	Power      BillCategoryFilter = "power"
+	Internet   BillCategoryFilter = "internet"
+	Toll       BillCategoryFilter = "toll"
+	Cable      BillCategoryFilter = "cable"
+	BillerCode BillCategoryFilter = "biller_code"
+)
 
 type ValidationData struct {
-	ItemCode string `json:"item_code"`
-	Code     string `json:"code"`
-	Customer string `json:"customer"`
+	ItemCode *string `json:"item_code"`
+	Code     *string `json:"code"`
+	Customer *string `json:"customer"`
 }
 
 type ValidationResponse struct {
@@ -75,12 +83,55 @@ type BillPaymentResponse struct {
 	Token       interface{} `json:"token"`
 }
 
-func (b Billpayment) GetBillCategories(filters *BillCategoriesFilter) (categories []BillCategory, err error) {
+func (b Billpayment) GetBillCategories(filter ...BillCategoryFilter) (categories []BillCategory, err error) {
+	var params map[string]string
+	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "categories")
+	if len(filter) > 0 {
+		if len(filter) > 1 {
+			err = errors.New("You cannot select more than one filter")
+			return
+		}
+		params = map[string]string{
+			string(filter[0]): strconv.Itoa(1),
+		}
+	}
+	err = b.Get(url, params, categories)
+	return
 }
 
 func (b Billpayment) ValidateBillCategory(data *ValidationData) (response ValidationResponse, err error) {
+	if data == nil {
+		err = errors.New("Please provide category information")
+		return
+	}
+	var params map[string]string
+	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "validate")
+
+	if data.ItemCode != nil {
+		url = strings.Replace(url, ":item_code", *data.ItemCode, -1)
+	} else {
+		err = errors.New("Please provide item_code")
+		return
+	}
+	if data.Code != nil {
+		params["code"] = *data.Code
+	} else {
+		err = errors.New("Please provide a biller code")
+		return
+	}
+	if data.Customer != nil {
+		params["customer"] = *data.Customer
+	} else {
+		err = errors.New("Please provide a customer identifier")
+		return
+	}
+	err = b.Get(url, params, response)
+	return
+
 }
 
-func (b Billpayment) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {}
-
-func (b Billpayment) Status(ref string) (response BillPaymentResponse, err error) {}
+//func (b Billpayment) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {
+//
+//}
+//
+//func (b Billpayment) Status(ref string) (response BillPaymentResponse, err error) {}
