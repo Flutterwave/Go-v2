@@ -153,10 +153,11 @@ var Endpoints = map[string]map[string]string{
 		"delete": "v2/gpx/transfers/beneficiaries/delete",
 	},
 	"Billspayments": {
-		"flybuy":                "v2/services/confluence",
-		"list_categories":       "v3/bill-categories",
-		"validate_services":     "v3/bill-items/:item_code/validate",
-		"get_history_or_status": "/v3/bills",
+		"flybuy":     "v2/services/confluence",
+		"categories": "v3/bill-categories",
+		"validate":   "v3/bill-items/:item_code/validate",
+		"list":       "/v3/bills",
+		"fetch":      "/v3/bills",
 	},
 	"flutterwaveOTP": {
 		"otp": "v2/services/confluence",
