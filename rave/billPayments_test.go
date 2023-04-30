@@ -6,13 +6,13 @@ import (
 )
 
 var rv = Rave{
-	false,
-	"FLWPUBK-xxxxxxxxxxxxxxxxxxxxx-X",
-	"FLWSECK-xxxxxxxxxxxxxxxxxxxxx-X",
 	true,
+	"FLWPUBK-xxxxxxxxxxxxxxxxxxxxx-X",
+	"FLWPUBK-xxxxxxxxxxxxxxxxxxxxx-X",
+	false,
 }
 
-var bp = BillPayments{r}
+var bp = BillPayments{rv}
 
 func TestBillpayment_GetBillCategories(t *testing.T) {
 	tests := []struct {
@@ -20,13 +20,21 @@ func TestBillpayment_GetBillCategories(t *testing.T) {
 		filters []BillCategoryFilter
 		wantErr bool
 	}{
-		// TODO: Add test cases.
-		{},
+		{
+			name:    "Get Billers test 1: No filter",
+			filters: nil,
+			wantErr: false,
+		},
+		{
+			name:    "Get Billers test 2: DSTV Only",
+			filters: []BillCategoryFilter{Cable},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotCategories, err := bp.GetBillCategories(tt.filters...)
-			fmt.Printf("categories returned: %+v", gotCategories)
+			fmt.Printf("categories returned: %+v\n", gotCategories)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetBillCategories() error = %v, wantErr %v", err, tt.wantErr)
 				return
