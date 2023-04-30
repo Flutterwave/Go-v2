@@ -18,9 +18,10 @@ const (
 
 // Rave base type
 type Rave struct {
-	Live      bool
-	PublicKey string
-	SecretKey string
+	Live          bool
+	PublicKey     string
+	SecretKey     string
+	EnableLogging bool
 }
 
 // BaseUrlGetter implements behaviour to get the base url (live or sandbox)
