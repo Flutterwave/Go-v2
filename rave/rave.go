@@ -33,12 +33,12 @@ type EndpointGetter interface {
 	GetEndpoint(endpointName string) map[string]string
 }
 
-//PublickeyGetter implements behaviour to get the developers public key
+// PublickeyGetter implements behaviour to get the developers public key
 type PublickeyGetter interface {
 	GetPublicKey() string
 }
 
-//SecretkeyGetter implements behaviour to get the developers secret key
+// SecretkeyGetter implements behaviour to get the developers secret key
 type SecretkeyGetter interface {
 	GetSecretKey() string
 }
@@ -147,26 +147,21 @@ var Endpoints = map[string]map[string]string{
 	},
 
 	"Beneficiaries": {
-		"list": "v2/gpx/transfers/beneficiaries",
-		"fetch": "v2/gpx/transfers/beneficiaries",
+		"list":   "v2/gpx/transfers/beneficiaries",
+		"fetch":  "v2/gpx/transfers/beneficiaries",
 		"create": "v2/gpx/transfers/beneficiaries/create",
 		"delete": "v2/gpx/transfers/beneficiaries/delete",
 	},
 	"Billspayments": {
-		"flybuy": "v2/services/confluence",
-	
+		"flybuy":                "v2/services/confluence",
+		"list_categories":       "v3/bill-categories",
+		"validate_services":     "v3/bill-items/:item_code/validate",
+		"get_history_or_status": "/v3/bills",
 	},
 	"flutterwaveOTP": {
 		"otp": "v2/services/confluence",
-	
 	},
-
-
-
-	
 }
-
-
 
 // gets the correct url for live and test mode
 func (r Rave) GetBaseURL() string {
