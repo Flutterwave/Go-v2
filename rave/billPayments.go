@@ -126,14 +126,14 @@ func (b BillPayments) ValidateBillCategory(data *ValidationData) (response Valid
 		err = errors.New("Please provide a customer identifier")
 		return
 	}
-	err = b.Get(url, params, response)
+	err = b.Get(url, params, &response)
 	return
 
 }
 
 func (b BillPayments) Create(req *BillPaymentRequest) (response BillPaymentResponse, err error) {
 	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "create")
-	err = b.Post(url, nil, req, response)
+	err = b.Post(url, nil, req, &response)
 	return
 }
 
@@ -143,6 +143,6 @@ func (b BillPayments) Status(ref string) (response BillPaymentResponse, err erro
 		return
 	}
 	url := b.GetBaseURL() + b.GetEndpoint("Billspayments", "fetch")
-	err = b.Get(fmt.Sprintf("%v/%v", url, ref), nil, response)
+	err = b.Get(fmt.Sprintf("%v/%v", url, ref), nil, &response)
 	return
 }
