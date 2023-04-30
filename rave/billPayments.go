@@ -96,7 +96,7 @@ func (b BillPayments) GetBillCategories(filter ...BillCategoryFilter) (categorie
 			string(filter[0]): strconv.Itoa(1),
 		}
 	}
-	err = b.Get(url, params, categories)
+	err = b.Get(url, params, &categories)
 	return
 }
 

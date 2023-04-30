@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,14 +12,14 @@ import (
 	"time"
 )
 
-func (r *Rave) Get(url string, params map[string]string, resp interface{}) (err error) {
-	return r.call(http.MethodGet, url, params, nil, &resp)
+func (r *Rave) Get(url string, params map[string]string, resp any) (err error) {
+	return r.call(http.MethodGet, url, params, nil, resp)
 }
 func (r *Rave) Post(url string, params map[string]string, body, resp interface{}) (err error) {
-	return r.call(http.MethodPost, url, params, body, &resp)
+	return r.call(http.MethodPost, url, params, body, resp)
 }
 
-func (r *Rave) call(method, url string, params map[string]string, body, v interface{}) (err error) {
+func (r *Rave) call(method, url string, params map[string]string, body, v any) (err error) {
 	var buf io.ReadWriter
 	if body != nil {
 		buf = new(bytes.Buffer)
@@ -72,8 +71,14 @@ func (r *Rave) call(method, url string, params map[string]string, body, v interf
 
 }
 
-func (r *Rave) decodeResponse(httpResp *http.Response, v interface{}) error {
-	var resp map[string]interface{}
+type jsonResp struct {
+	Status  string          `json:"status"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
+}
+
+func (r *Rave) decodeResponse(httpResp *http.Response, v any) error {
+	var resp jsonResp
 	respBody, err := ioutil.ReadAll(httpResp.Body)
 	if err != nil {
 		return err
@@ -83,10 +88,10 @@ func (r *Rave) decodeResponse(httpResp *http.Response, v interface{}) error {
 		return err
 	}
 
-	if status, _ := resp["status"].(string); status != "success" || httpResp.StatusCode >= 400 {
+	if resp.Status != "success" || httpResp.StatusCode >= 400 {
 		err = errors.New("Unkown error")
-		if fwErr, ok := resp["message"].(string); ok {
-			err = errors.New(fwErr)
+		if resp.Message != "" {
+			err = errors.New(resp.Message)
 		}
 		if r.EnableLogging {
 			log.Printf("Flutterwave error: %+v", err)
@@ -99,31 +104,9 @@ func (r *Rave) decodeResponse(httpResp *http.Response, v interface{}) error {
 		log.Printf("Flutterwave response: %v\n", resp)
 	}
 
-	if data, ok := resp["data"]; ok {
-		switch t := resp["data"].(type) {
-		case map[string]interface{}:
-			return mapstruct(data, v)
-		default:
-			_ = t
-			return mapstruct(resp, v)
-		}
-	}
-	// if response data does not contain data key, map entire response to v
-	return mapstruct(resp, v)
-}
-
-func mapstruct(data interface{}, v interface{}) error {
-	config := &mapstructure.DecoderConfig{
-		Result:           v,
-		TagName:          "json",
-		WeaklyTypedInput: true,
-	}
-	decoder, err := mapstructure.NewDecoder(config)
-	if err != nil {
-		return err
-	}
-	err = decoder.Decode(data)
+	err = json.Unmarshal(resp.Data, v)
 	return err
+
 }
 
 //type ErrorBody struct {
